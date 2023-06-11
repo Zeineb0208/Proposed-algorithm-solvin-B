@@ -1,0 +1,298 @@
+import math
+import random
+import time
+import matplotlib.pyplot as plt
+import numpy as np
+
+
+class Node:
+    def __init__(self, x, y, demand):
+        self.x = x
+        self.y = y
+        self.demand = demand
+
+
+def calculate_distance(node1, node2):
+    dx = node1.x - node2.x
+    dy = node1.y - node2.y
+    return math.sqrt(dx * dx + dy * dy)
+
+
+def get_angle(node, depot):
+    dx = node.x - depot.x
+    dy = node.y - depot.y
+    return math.atan2(dy, dx)
+
+
+def get_sorted_nodes(nodes, depot):
+    return sorted(nodes, key=lambda node: get_angle(node, depot))
+
+
+def create_route(nodes, depot, capacity):
+    route = []
+    remaining_capacity = capacity
+
+    for node in nodes:
+        if node.demand <= remaining_capacity:
+            route.append(node)
+            remaining_capacity -= node.demand
+        else:
+            break
+
+    route.append(depot)  # Add depot as the last node to return
+
+    return route
+
+
+def solve_vrp(nodes, depot_index, vehicle_capacity, num_vehicles):
+    depot = nodes[depot_index]
+    del nodes[depot_index]
+
+    nodes = get_sorted_nodes(nodes, depot)
+
+    routes = [[] for _ in range(num_vehicles)]  # Separate routes for each vehicle
+
+    for i, node in enumerate(nodes):
+        route_index = i % num_vehicles  # Assign nodes to vehicles in a round-robin fashion
+        current_route = routes[route_index]
+        current_capacity = sum(node.demand for node in current_route)
+
+        if current_capacity + node.demand <= vehicle_capacity:
+            current_route.append(node)
+
+    for route in routes:
+        route.insert(0, depot)  # Add depot as the first node
+        route.append(depot)  # Add depot as the last node
+
+    return routes
+
+
+def calculate_total_distance(route):
+    total_distance = 0
+    for i in range(len(route) - 1):
+        total_distance += calculate_distance(route[i], route[i + 1])
+    return total_distance
+
+
+# Define locations
+locations = np.array([(714187.08,3838925.34),
+(714187.08,3838935.34),
+(714197.08,3838935.34),
+(714207.08,3838935.34),
+(714217.08,3838935.34),
+(714227.08,3838935.34),
+(714237.08,3838935.34),
+(714247.08,3838935.34),
+(714257.08,3838935.34),
+(714267.08,3838935.34),
+(714277.08,3838935.34),
+(714287.08,3838935.34),
+(714297.08,3838935.34),
+(714307.08,3838935.34),
+(714187.08,3838945.34),
+(714197.08,3838945.34),
+(714207.08,3838945.34),
+(714217.08,3838945.34),
+(714227.08,3838945.34),
+(714237.08,3838945.34),
+(714247.08,3838945.34),
+(714257.08,3838945.34),
+(714267.08,3838945.34),
+(714277.08,3838945.34),
+(714287.08,3838945.34),
+(714297.08,3838945.34),
+(714307.08,3838945.34),
+(714187.08,3838955.34),
+(714197.08,3838955.34),
+(714207.08,3838955.34),
+(714217.08,3838955.34),
+(714227.08,3838955.34),
+(714237.08,3838955.34),
+(714247.08,3838955.34),
+(714257.08,3838955.34),
+(714267.08,3838955.34),
+(714277.08,3838955.34),
+(714287.08,3838955.34),
+(714297.08,3838955.34),
+(714307.08,3838955.34),
+(714187.08,3838965.34),
+(714197.08,3838965.34),
+(714207.08,3838965.34),
+(714217.08,3838965.34),
+(714227.08,3838965.34),
+(714237.08,3838965.34),
+(714247.08,3838965.34),
+(714257.08,3838965.34),
+(714267.08,3838965.34),
+(714277.08,3838965.34),
+(714287.08,3838965.34),
+(714297.08,3838965.34),
+(714307.08,3838965.34),
+(714187.08,3838975.34),
+(714197.08,3838975.34),
+(714207.08,3838975.34),
+(714217.08,3838975.34),
+(714227.08,3838975.34),
+(714237.08,3838975.34),
+(714247.08,3838975.34),
+(714257.08,3838975.34),
+(714267.08,3838975.34),
+(714277.08,3838975.34),
+(714287.08,3838975.34),
+(714297.08,3838975.34),
+(714307.08,3838975.34),
+(714187.08,3838985.34),
+(714197.08,3838985.34),
+(714207.08,3838985.34),
+(714217.08,3838985.34),
+(714227.08,3838985.34),
+(714237.08,3838985.34),
+(714247.08,3838985.34),
+(714257.08,3838985.34),
+(714267.08,3838985.34),
+(714277.08,3838985.34),
+(714287.08,3838985.34),
+(714297.08,3838985.34),
+(714307.08,3838985.34),
+(714187.08,3838995.34),
+(714197.08,3838995.34),
+(714207.08,3838995.34),
+(714217.08,3838995.34),
+(714227.08,3838995.34),
+(714237.08,3838995.34),
+(714247.08,3838995.34),
+(714257.08,3838995.34),
+(714267.08,3838995.34),
+(714277.08,3838995.34),
+(714287.08,3838995.34),
+(714297.08,3838995.34),
+(714307.08,3838995.34),
+(714187.08,3839005.34),
+(714197.08,3839005.34),
+(714207.08,3839005.34),
+(714217.08,3839005.34),
+(714227.08,3839005.34),
+(714237.08,3839005.34),
+(714247.08,3839005.34),
+(714257.08,3839005.34),
+(714267.08,3839005.34),
+(714277.08,3839005.34),
+(714287.08,3839005.34),
+(714297.08,3839005.34),
+(714307.08,3839005.34),
+(714187.08,3839015.34),
+(714197.08,3839015.34),
+(714207.08,3839015.34),
+(714217.08,3839015.34),
+(714227.08,3839015.34),
+(714237.08,3839015.34),
+(714247.08,3839015.34),
+(714257.08,3839015.34),
+(714267.08,3839015.34),
+(714277.08,3839015.34),
+(714287.08,3839015.34),
+(714297.08,3839015.34),
+(714307.08,3839015.34),
+(714187.08,3839025.34),
+(714197.08,3839025.34),
+(714207.08,3839025.34),
+(714217.08,3839025.34),
+(714227.08,3839025.34),
+(714237.08,3839025.34),
+(714247.08,3839025.34),
+(714257.08,3839025.34),
+(714267.08,3839025.34),
+(714277.08,3839025.34),
+(714287.08,3839025.34),
+(714297.08,3839025.34),
+(714307.08,3839025.34),
+(714187.08,3839035.34),
+(714197.08,3839035.34),
+(714207.08,3839035.34),
+(714217.08,3839035.34),
+(714227.08,3839035.34),
+(714237.08,3839035.34),
+(714247.08,3839035.34),
+(714257.08,3839035.34),
+(714267.08,3839035.34),
+(714277.08,3839035.34),
+(714287.08,3839035.34),
+(714297.08,3839035.34),
+(714307.08,3839035.34),
+(714187.08,3839045.34),
+(714197.08,3839045.34),
+(714207.08,3839045.34),
+(714217.08,3839045.34),
+(714227.08,3839045.34),
+(714237.08,3839045.34),
+(714247.08,3839045.34),
+(714257.08,3839045.34),
+(714267.08,3839045.34),
+(714277.08,3839045.34),
+(714287.08,3839045.34),
+(714297.08,3839045.34),
+(714307.08,3839045.34)
+])
+
+# Define demand
+demand = np.random.randint(1, 10, size=len(locations))
+
+vehicle_capacity = 160
+depot_index = 0
+num_vehicles = 2
+
+nodes = [Node(location[0], location[1], d) for location, d in zip(locations, demand)]
+
+start_time = time.time()
+routes = solve_vrp(nodes, depot_index, vehicle_capacity, num_vehicles)
+time.sleep(1)  # Add a delay of 1 second to simulate a longer runtime
+end_time = time.time()
+runtime = end_time - start_time
+
+# Extract route coordinates for plotting
+route_coords = [[] for _ in range(num_vehicles)]
+for i, route in enumerate(routes):
+    for node in route:
+        route_coords[i].append((node.x, node.y))
+
+# Plot the routes
+plt.figure(figsize=(8, 8))
+plt.title("Vehicle Routing Problem (VRP) Solution")
+for i, coords in enumerate(route_coords):
+    x, y = zip(*coords)
+    plt.plot(x, y, marker='o', label=f"Vehicle {i + 1}")
+plt.xlabel("X-coordinate")
+plt.ylabel("Y-coordinate")
+plt.legend()
+# Display the runtime with decimal places
+plt.text(0.5, -0.1, "Runtime: {:.3f} seconds".format(runtime), ha='center', transform=plt.gca().transAxes)
+
+plt.grid(True)
+plt.show()
+
+# Print the routes and calculate total distance
+best_distance = float('inf')
+best_route = None
+for i, route in enumerate(routes):
+    print(f"Route {i + 1}:")
+    for node in route:
+        print(f"({node.x}, {node.y})")
+    print()
+
+    route_distance = calculate_total_distance(route)
+    if route_distance < best_distance:
+        best_distance = route_distance
+        best_route = route
+
+# Additional calculations
+average_distance_per_vehicle = sum(calculate_total_distance(route) for route in routes) / num_vehicles
+max_distance_per_vehicle = max(calculate_total_distance(route) for route in routes)
+average_locations_per_vehicle = sum(len(route) - 2 for route in routes) / num_vehicles
+std_dev_locations_per_vehicle = math.sqrt(
+    sum((len(route) - 2 - average_locations_per_vehicle) ** 2 for route in routes) / num_vehicles)
+std_dev_solution = math.sqrt(
+    sum((calculate_total_distance(route) - average_distance_per_vehicle) ** 2 for route in routes) / num_vehicles)
+
+# Display the runtime and additional statistics with decimal places
+print("Runtime: {:.3f} seconds".format(runtime))
+print("Best Distance:", best_distance)
